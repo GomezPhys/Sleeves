@@ -653,3 +653,119 @@ bar_plot <- bar_plot +
 # Print the plot
 print(bar_plot)
 
+
+
+###
+
+# Filter the data for "POST" results in the "No Sleeves" condition
+filtered_data <- Df %>% filter(Condition == "NS" & Time == "POST")
+
+# Perform ANOVA using "Lactate" as the dependent variable
+anova_model <- aov(Lactate ~ Workload, data = filtered_data)
+
+# Post-hoc tests (if ANOVA is significant)
+posthoc_results <- TukeyHSD(anova_model, "Workload")
+
+# Convert posthoc_results to a data frame
+posthoc_df <- as.data.frame(posthoc_results$`Workload`)
+
+# Filter significant comparisons
+signif_comparisons <- posthoc_df %>%
+  filter(p.adj < 0.05)
+
+str(posthoc_df)
+
+###
+# Filter significant comparisons
+signif_comparisons <- posthoc_df %>%
+  filter(`p adj` < 0.05)
+
+# Bar plot for "POST" results in the "No Sleeves" condition
+bar_plot <- ggplot(filtered_data, aes(x = Workload, y = Lactate, fill = Time)) +
+  geom_bar(position = "dodge", stat = "identity", width = 0.7) +
+  labs(x = "Workload", y = "Lactate", fill = "Time", title = "Bar Plot: Lactate for POST in No Sleeves Condition") +
+  theme_minimal()
+
+# Add significance annotations using annotate() for significant comparisons only
+if (!is.null(signif_comparisons) && nrow(signif_comparisons) > 0) {
+  bar_plot <- bar_plot +
+    annotate("text", data = signif_comparisons,
+             aes(x = Workload, y = max(filtered_data$Lactate, na.rm = TRUE) + 0.2, label = "*"),
+             position = position_dodge(width = 0.7), vjust = -0.5, size = 5)
+}
+
+# Print the plot
+print(bar_plot)
+
+
+###SvsNS POST
+# Filter the data for "POST" results in the "No Sleeves" condition
+filtered_data <- Df %>% filter(Condition == "NS" & Time == "POST")
+
+# Bar plot for "POST" results in the "No Sleeves" condition
+bar_plot <- ggplot(filtered_data, aes(x = Workload, y = Lactate, fill = Time)) +
+  geom_bar(position = "dodge", stat = "identity", width = 0.7) +
+  labs(x = "Workload", y = "Lactate", fill = "Time", title = "No Sleeves") +
+  theme_minimal()
+
+# Perform ANOVA using "Lactate" as the dependent variable
+anova_model <- aov(Lactate ~ Workload, data = filtered_data)
+
+# Post-hoc tests (if ANOVA is significant)
+posthoc_results <- TukeyHSD(anova_model, "Workload")
+
+# Convert posthoc_results to a data frame
+posthoc_df <- as.data.frame(posthoc_results$Workload)
+
+# Filter significant comparisons between "S" and "NS" at POST
+signif_comparisons <- posthoc_df %>%
+  filter(`p adj` < 0.05 & grepl("S-NS", rownames(posthoc_df)))
+
+# Add significance annotations using annotate() for significant comparisons only
+if (nrow(signif_comparisons) > 0) {
+  bar_plot <- bar_plot +
+    annotate("text", data = signif_comparisons,
+             aes(x = Workload, y = max(filtered_data$Lactate, na.rm = TRUE) + 0.2, label = "*"),
+             position = position_dodge(width = 0.7), vjust = -0.5, size = 5)
+}
+
+# Print the plot
+print(bar_plot)
+
+
+####
+# Filter the data for "POST" results in the "S" and "NS" conditions
+filtered_data <- Df %>% filter(Condition %in% c("S", "NS") & Time == "POST")
+
+# Bar plot for "POST" results in the "S" and "NS" conditions
+bar_plot <- ggplot(filtered_data, aes(x = Workload, y = Lactate, fill = Condition)) +
+  geom_bar(position = position_dodge(width = 0.7), stat = "identity") +
+  labs(x = "Workload (W)", y = "Lactate (m/mmol)", fill = "Condition", title = "Bar Plot: Lactate for POST in S and NS Conditions") +
+  theme_minimal()
+
+# Perform ANOVA using "Lactate" as the dependent variable
+anova_model <- aov(Lactate ~ Condition * Workload, data = filtered_data)
+
+# Post-hoc tests (if ANOVA is significant)
+posthoc_results <- TukeyHSD(anova_model, "Condition:Workload")
+
+# Convert posthoc_results to a data frame
+posthoc_df <- as.data.frame(posthoc_results$`Condition:Workload`)
+
+# Filter significant comparisons between "S" and "NS" at POST
+signif_comparisons <- posthoc_df %>%
+  filter(`p adj` < 0.05 & grepl("NS-S", rownames(posthoc_df)))
+
+# Add significance annotations using annotate() for significant comparisons only
+if (nrow(signif_comparisons) > 0) {
+  bar_plot <- bar_plot +
+    annotate("text", data = signif_comparisons,
+             aes(x = Workload, y = max(filtered_data$Lactate, na.rm = TRUE) + 0.2, label = "*"),
+             position = position_dodge(width = 0.7), vjust = -0.5, size = 5)
+}
+
+# Print the plot
+print(bar_plot)
+
+
+
